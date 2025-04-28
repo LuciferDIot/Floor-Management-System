@@ -1,25 +1,15 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { Plus } from "lucide-react";
 import { useEffect } from "react";
 import { useFloorStore } from "../store/floor-store";
 import { FurnitureCategory, ShapeType } from "../types/floor-types";
 import FloorCanvas from "./floor-canvas";
+import FloorTabs from "./floor-tabs";
 import LeftSidebar from "./left-sidebar";
-import { Button } from "./ui/button";
 
 export default function FloorManager() {
-  const {
-    floors,
-    activeFloor,
-    setActiveFloor,
-    setFloors,
-    setActiveShape,
-    handleAddFloor,
-  } = useFloorStore();
+  const { floors, setFloors, setActiveShape } = useFloorStore();
 
-  // Initialize floor 1 with some tables
   useEffect(() => {
     if (floors[0].shapes.length === 0) {
       const initialTables = Array.from({ length: 9 }, (_, i) => ({
@@ -50,7 +40,9 @@ export default function FloorManager() {
     }
   }, [floors, setFloors, setActiveShape]);
 
-  const currentFloor = floors.find((f) => f.id === activeFloor) || floors[0];
+  const currentFloor =
+    floors.find((f) => f.id === useFloorStore.getState().activeFloor) ||
+    floors[0];
 
   return (
     <div className="flex flex-col h-screen">
@@ -60,34 +52,8 @@ export default function FloorManager() {
 
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
-
-        {/* Main content */}
         <div className="flex-1 flex flex-col">
-          <div className="border-b">
-            <Tabs value={activeFloor} onValueChange={setActiveFloor}>
-              <TabsList className="h-12 w-full justify-start rounded-none border-b bg-white px-4">
-                {floors.map((floor) => (
-                  <TabsTrigger
-                    key={floor.id}
-                    value={floor.id}
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6"
-                  >
-                    {floor.name}
-                  </TabsTrigger>
-                ))}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleAddFloor}
-                  className="ml-2"
-                >
-                  <Plus size={16} className="mr-1" />
-                  Add Floor
-                </Button>
-              </TabsList>
-            </Tabs>
-          </div>
-
+          <FloorTabs />
           <div className="flex-1 overflow-auto p-4 bg-gray-50">
             <FloorCanvas floor={currentFloor} />
           </div>
