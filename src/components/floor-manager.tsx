@@ -1,64 +1,112 @@
 "use client";
-
-import { useEffect } from "react";
-import { useFloorStore } from "../store/floor-store";
-import { FurnitureCategory, ShapeType } from "../types/floor-types";
-import FloorCanvas from "./floor-canvas";
+import { useEffect, useState } from "react";
+import { FloorProvider, useFloorContext } from "../context/floor-context";
+import CanvasArea from "./canvas-area";
+import FloorCreator from "./floor-creator";
 import FloorTabs from "./floor-tabs";
-import LeftSidebar from "./left-sidebar";
+import PropertiesPanel from "./properties-panel";
+import ReservationPanel from "./reservation-panel";
+import ShapePicker from "./shape-picker";
+import ToolBar from "./tool-bar";
+// Add error boundary to catch and handle ResizeObserver errors
+// Add at the top of the file, after the existing imports
+import { ErrorBoundary } from "react-error-boundary";
 
-export default function FloorManager() {
-  const { floors, setFloors, setActiveShape } = useFloorStore();
-
-  useEffect(() => {
-    if (floors[0].shapes.length === 0) {
-      const initialTables = Array.from({ length: 9 }, (_, i) => ({
-        id: `T0${i + 1}`,
-        type: "circle" as ShapeType,
-        x: (i % 3) * 220 + 130,
-        y: Math.floor(i / 3) * 220 + 130,
-        width: 100,
-        height: 100,
-        category: "table" as FurnitureCategory,
-        label: `T0${i + 1}`,
-        color: i === 7 ? "#2c5282" : "#d1d5db",
-        selected: i === 0,
-        chairs: [
-          { angle: 0, distance: 60 },
-          { angle: 90, distance: 60 },
-          { angle: 180, distance: 60 },
-          { angle: 270, distance: 60 },
-        ],
-      }));
-
-      setFloors(
-        floors.map((floor, index) =>
-          index === 0 ? { ...floor, shapes: initialTables } : floor
-        )
-      );
-      setActiveShape("T01");
-    }
-  }, [floors, setFloors, setActiveShape]);
-
-  const currentFloor =
-    floors.find((f) => f.id === useFloorStore.getState().activeFloor) ||
-    floors[0];
+// Create a fallback component
+function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) {
+  // Check if it's a ResizeObserver error
+  const isResizeObserverError =
+    error.message && error.message.includes("ResizeObserver");
 
   return (
-    <div className="flex flex-col h-screen">
-      <header className="bg-white border-b p-4">
-        <h1 className="text-2xl font-bold">Restaurant Floor Manager</h1>
-      </header>
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)] border rounded-lg p-8">
+      <h2 className="text-xl font-bold mb-6">
+        {isResizeObserverError
+          ? "Layout Issue Detected"
+          : "Something went wrong"}
+      </h2>
+      <p className="text-red-500 mb-4">
+        {isResizeObserverError
+          ? "The application encountered a layout issue. This is usually temporary."
+          : error.message}
+      </p>
+      <button
+        onClick={resetErrorBoundary}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Try again
+      </button>
+    </div>
+  );
+}
 
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <div className="flex-1 flex flex-col">
-          <FloorTabs />
-          <div className="flex-1 overflow-auto p-4 bg-gray-50">
-            <FloorCanvas floor={currentFloor} />
-          </div>
+function FloorManagerContent() {
+  const { floors } = useFloorContext();
+  const [showFloorCreator, setShowFloorCreator] = useState(false);
+
+  // Show floor creator if no floors exist
+  useEffect(() => {
+    if (floors.length === 0) {
+      setShowFloorCreator(true);
+    } else {
+      setShowFloorCreator(false);
+    }
+  }, [floors.length]);
+
+  if (showFloorCreator || floors.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)] border rounded-lg p-8">
+        <h2 className="text-xl font-bold mb-6">Create Your First Floor</h2>
+        <div className="w-full max-w-md">
+          <FloorCreator onFloorCreated={() => setShowFloorCreator(false)} />
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full h-[calc(100vh-100px)] border rounded-lg overflow-hidden">
+      <div className="w-64 border-r bg-gray-50 flex flex-col">
+        <ShapePicker />
+        <PropertiesPanel />
+      </div>
+      <div className="flex-1 flex flex-col relative">
+        <FloorTabs onAddFloor={() => setShowFloorCreator(true)} />
+        <CanvasArea />
+        <ToolBar />
+        <ReservationPanel />
+      </div>
     </div>
+  );
+}
+
+// Wrap the FloorManagerContent component with ErrorBoundary
+export default function FloorManager() {
+  return (
+    <FloorProvider>
+      <ErrorBoundary
+        FallbackComponent={ErrorFallback}
+        onReset={(error) => {
+          // For ResizeObserver errors, we don't need a full reload
+          if (
+            error instanceof Error &&
+            error.message.includes("ResizeObserver")
+          ) {
+            // Just reset the state
+          } else {
+            // For other errors, reload the page
+            window.location.reload();
+          }
+        }}
+      >
+        <FloorManagerContent />
+      </ErrorBoundary>
+    </FloorProvider>
   );
 }
