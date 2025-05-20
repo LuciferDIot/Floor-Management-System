@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useFloorActions } from "@/hooks/useFloorActions";
+import { useSelectionActions } from "@/hooks/useSelectionActions";
 import { useCanvasInteractions } from "@/lib/hooks/use-canvas-interactions";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -20,8 +21,8 @@ export function Canvas() {
     gridSize,
     isDrawingCustomShape,
     addFloor,
-    setSelectedElements,
   } = useFloorActions();
+  const { setSelectedElements } = useSelectionActions();
 
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({

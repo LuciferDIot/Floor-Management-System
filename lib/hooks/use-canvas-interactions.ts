@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { useFloorActions } from "@/hooks/useFloorActions";
+import { useSelectionActions } from "@/hooks/useSelectionActions";
 import { useShapeActions } from "@/hooks/useShapeActions";
 import { useToolActions } from "@/hooks/useToolActions";
 import { useCallback, useRef } from "react";
@@ -13,7 +14,8 @@ export function useCanvasInteractions(
   canvasRef: React.RefObject<HTMLDivElement | null>
 ) {
   const { updatePanOffset, updateZoom } = useCanvasActions();
-  const { zoom, panOffset, setSelectedElements } = useFloorActions();
+  const { zoom, panOffset } = useFloorActions();
+  const { setSelectedElements } = useSelectionActions();
   const { currentTool } = useToolActions();
   const { addShape } = useShapeActions();
 

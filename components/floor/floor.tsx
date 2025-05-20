@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useFloorActions } from "@/hooks/useFloorActions";
+import { useSelectionActions } from "@/hooks/useSelectionActions";
 import { ElementType, type FloorType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
@@ -25,15 +26,16 @@ export function Floor({ floor }: FloorProps) {
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);
 
   const {
-    selectedElements,
-    setSelectedElements,
     updateFloor,
     deleteFloor,
     duplicateFloor,
     bringFloorToFront,
     sendFloorToBack,
     addToHistory,
+    selectedElements,
   } = useFloorActions();
+
+  const { setSelectedElements } = useSelectionActions();
 
   const isSelected = selectedElements.some(
     (el) => el.id === floor.id && el.type === ElementType.FLOOR

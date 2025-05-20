@@ -105,7 +105,6 @@ export const useFloorActions = () => {
     deleteFloor,
     duplicateFloor,
     bringFloorToFront,
-    setSelectedElements,
     sendFloorToBack,
     addToHistory,
   };

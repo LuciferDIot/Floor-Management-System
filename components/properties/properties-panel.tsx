@@ -14,6 +14,7 @@ import { ReservationForm } from "../reservation/reservation-form";
 export function PropertiesPanel() {
   const { selectedElements, floors, updateShape } = useShapeActions();
   const { updateFloor, addToHistory } = useFloorActions();
+  console.log(floors);
 
   const [properties, setProperties] = useState<{
     x: number;
@@ -72,14 +73,14 @@ export function PropertiesPanel() {
   }, [selectedElements, floors]);
 
   const handlePropertyChange = (property: string, value: number | string) => {
-    setProperties({
+    if (selectedElements.length !== 1) return;
+
+    const newProperties = {
       ...properties,
       [property]: value,
-    });
-  };
+    };
 
-  const handleApplyChanges = () => {
-    if (selectedElements.length !== 1) return;
+    setProperties(newProperties);
 
     const element = selectedElements[0];
 
@@ -91,12 +92,12 @@ export function PropertiesPanel() {
           const shape = floor.shapes[shapeIndex];
           updateShape(floor.id, shape.id, {
             ...shape,
-            x: properties.x,
-            y: properties.y,
-            width: properties.width,
-            height: properties.height,
-            rotation: properties.rotation,
-            label: properties.label,
+            x: newProperties.x,
+            y: newProperties.y,
+            width: newProperties.width,
+            height: newProperties.height,
+            rotation: newProperties.rotation,
+            label: newProperties.label,
           });
           break;
         }
@@ -108,11 +109,11 @@ export function PropertiesPanel() {
         const floor = floors[floorIndex];
         updateFloor(floor.id, {
           ...floor,
-          x: properties.x,
-          y: properties.y,
-          width: properties.width,
-          height: properties.height,
-          name: properties.label,
+          x: newProperties.x,
+          y: newProperties.y,
+          width: newProperties.width,
+          height: newProperties.height,
+          name: newProperties.label,
         });
       }
     }
@@ -209,7 +210,7 @@ export function PropertiesPanel() {
           selectedElements[0].type === ElementType.SHAPE && (
             <div className="space-y-2">
               <Label htmlFor="rotation">
-                Rotation ({properties.rotation}°)
+                Rotation ({properties.rotation.toFixed(2)}°)
               </Label>
               <Slider
                 id="rotation"
@@ -223,10 +224,6 @@ export function PropertiesPanel() {
               />
             </div>
           )}
-
-        <Button onClick={handleApplyChanges} className="w-full">
-          Apply Changes
-        </Button>
 
         {isTable() && (
           <Button
