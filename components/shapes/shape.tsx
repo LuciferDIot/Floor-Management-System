@@ -2,7 +2,10 @@
 
 import type React from "react";
 
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useReservationActions } from "@/hooks/useReservationActions";
+import { useSelectionActions } from "@/hooks/useSelectionActions";
+import { useShapeActions } from "@/hooks/useShapeActions";
 import {
   type ShapeType,
   ElementType,
@@ -31,19 +34,13 @@ export function Shape({ shape, floorId, isInGroup = false }: ShapeProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
-  const {
-    selectedElements,
-    selectShape,
-    updateShape,
-    deleteShape,
-    moveShape,
-    reserveTable,
-    unreserveTable,
-    snapToGrid,
-    gridSize,
-    addToHistory,
-    getChairsForTable,
-  } = useFloorPlanStore();
+  const { selectedElements, updateShape, deleteShape, moveShape } =
+    useShapeActions();
+  const { reserveTable, unreserveTable, getChairsForTable } =
+    useReservationActions();
+
+  const { snapToGrid, gridSize, addToHistory } = useFloorActions();
+  const { selectShape } = useSelectionActions();
 
   const isSelected = selectedElements.some(
     (el) => el.id === shape.id && el.type === ElementType.SHAPE

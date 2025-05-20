@@ -4,15 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useShapeActions } from "@/hooks/useShapeActions";
 import { ElementType, ShapeCategory } from "@/lib/types";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ReservationForm } from "../reservation/reservation-form";
 
 export function PropertiesPanel() {
-  const { selectedElements, floors, updateShape, updateFloor, addToHistory } =
-    useFloorPlanStore();
+  const { selectedElements, floors, updateShape } = useShapeActions();
+  const { updateFloor, addToHistory } = useFloorActions();
 
   const [properties, setProperties] = useState<{
     x: number;

@@ -8,13 +8,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useShapeActions } from "@/hooks/useShapeActions";
 import { ShapeCategory } from "@/lib/types";
 import { ChevronDown, Circle, Square } from "lucide-react";
 import { useState } from "react";
 
 export function ShapePicker() {
-  const { addShape } = useFloorPlanStore();
+  const { addShape } = useShapeActions();
   const [open, setOpen] = useState(false);
 
   const tableTemplates = [

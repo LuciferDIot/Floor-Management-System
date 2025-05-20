@@ -2,11 +2,12 @@
 
 import type React from "react";
 
-import { useRef, useState, useEffect } from "react";
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
-import { RotateHandle } from "./rotate-handle";
-import { cn } from "@/lib/utils";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useGroupActions } from "@/hooks/useGroupActions";
 import { ElementType } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+import { RotateHandle } from "./rotate-handle";
 
 interface GroupWrapperProps {
   groupId: string;
@@ -23,14 +24,10 @@ export function GroupWrapper({
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
-  const {
-    groups,
-    selectedElements,
-    selectGroup,
-    rotateGroup,
-    moveGroup,
-    addToHistory,
-  } = useFloorPlanStore();
+  const { groups, selectedElements, selectGroup, rotateGroup, moveGroup } =
+    useGroupActions();
+
+  const { addToHistory } = useFloorActions();
 
   const group = groups[groupId];
   if (!group) return null;

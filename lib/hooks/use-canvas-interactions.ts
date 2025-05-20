@@ -2,22 +2,20 @@
 
 import type React from "react";
 
+import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useShapeActions } from "@/hooks/useShapeActions";
+import { useToolActions } from "@/hooks/useToolActions";
 import { useCallback, useRef } from "react";
-import { useFloorPlanStore } from "../store/floor-plan-store";
 import { ShapeCategory } from "../types";
 
 export function useCanvasInteractions(
-  canvasRef: React.RefObject<HTMLDivElement>
+  canvasRef: React.RefObject<HTMLDivElement | null>
 ) {
-  const {
-    zoom,
-    setZoom,
-    panOffset,
-    setPanOffset,
-    setSelectedElements,
-    currentTool,
-    addShape,
-  } = useFloorPlanStore();
+  const { updatePanOffset, updateZoom } = useCanvasActions();
+  const { zoom, panOffset, setSelectedElements } = useFloorActions();
+  const { currentTool } = useToolActions();
+  const { addShape } = useShapeActions();
 
   const isDraggingCanvas = useRef(false);
   const lastMousePos = useRef({ x: 0, y: 0 });
@@ -83,7 +81,7 @@ export function useCanvasInteractions(
         const dx = e.clientX - lastMousePos.current.x;
         const dy = e.clientY - lastMousePos.current.y;
 
-        setPanOffset({
+        updatePanOffset({
           x: panOffset.x + dx / zoom,
           y: panOffset.y + dy / zoom,
         });
@@ -91,7 +89,7 @@ export function useCanvasInteractions(
         lastMousePos.current = { x: e.clientX, y: e.clientY };
       }
     },
-    [panOffset, setPanOffset, zoom]
+    [panOffset, updatePanOffset, zoom]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -123,10 +121,10 @@ export function useCanvasInteractions(
         y: worldY - mouseY / newZoom,
       };
 
-      setZoom(newZoom);
-      setPanOffset(newPanOffset);
+      updateZoom(newZoom);
+      updatePanOffset(newPanOffset);
     },
-    [zoom, panOffset, setZoom, setPanOffset]
+    [zoom, panOffset, updateZoom, updatePanOffset]
   );
 
   const handleMiddleMouseDown = useCallback((e: React.MouseEvent) => {

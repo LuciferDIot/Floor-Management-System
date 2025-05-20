@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useFloorActions } from "@/hooks/useFloorActions";
 import { ElementType, type FloorType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
@@ -33,7 +33,7 @@ export function Floor({ floor }: FloorProps) {
     bringFloorToFront,
     sendFloorToBack,
     addToHistory,
-  } = useFloorPlanStore();
+  } = useFloorActions();
 
   const isSelected = selectedElements.some(
     (el) => el.id === floor.id && el.type === ElementType.FLOOR

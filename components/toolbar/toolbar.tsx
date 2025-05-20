@@ -1,23 +1,26 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Save,
-  Undo,
-  Redo,
-  Grid,
-  Square,
-  Circle,
-  Pencil,
-  Group,
-  Ungroup,
-  RotateCcw,
-} from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
-import { ShapePicker } from "./shape-picker";
-import { LoadPlanDropdown } from "./load-plan-dropdown";
+import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useGroupActions } from "@/hooks/useGroupActions";
+import { useToolActions } from "@/hooks/useToolActions";
 import { ShapeCategory } from "@/lib/types";
+import {
+  Circle,
+  Grid,
+  Group,
+  Pencil,
+  Redo,
+  RotateCcw,
+  Save,
+  Square,
+  Undo,
+  Ungroup,
+} from "lucide-react";
+import { LoadPlanDropdown } from "./load-plan-dropdown";
+import { ShapePicker } from "./shape-picker";
 
 interface ToolbarProps {
   onCustomShapeClick: () => void;
@@ -38,16 +41,11 @@ export function Toolbar({
   onUndo,
   onRedo,
 }: ToolbarProps) {
-  const {
-    snapToGrid,
-    setSnapToGrid,
-    selectedElements,
-    createGroup,
-    ungroupElements,
-    addShape,
-    currentTool,
-    setCurrentTool,
-  } = useFloorPlanStore();
+  const { snapToGrid, selectedElements } = useFloorActions();
+
+  const { updateSnapToGrid } = useCanvasActions();
+  const { createGroup, ungroupElements } = useGroupActions();
+  const { currentTool, updateCurrentTool } = useToolActions();
 
   const hasSelection = selectedElements.length > 0;
   const hasMultiSelection = selectedElements.length > 1;
@@ -93,7 +91,7 @@ export function Toolbar({
         <Button
           variant={snapToGrid ? "default" : "ghost"}
           size="sm"
-          onClick={() => setSnapToGrid(!snapToGrid)}
+          onClick={() => updateSnapToGrid(!snapToGrid)}
           className="gap-1"
           title="Snap to Grid"
         >
@@ -107,7 +105,7 @@ export function Toolbar({
       <ToggleGroup
         type="single"
         value={currentTool}
-        onValueChange={(value) => value && setCurrentTool(value)}
+        onValueChange={(value) => value && updateCurrentTool(value)}
       >
         <ToggleGroupItem value="select" title="Select Tool">
           <RotateCcw className="h-4 w-4" />
