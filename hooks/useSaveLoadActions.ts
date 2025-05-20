@@ -1,5 +1,6 @@
 import { useFloorPlanStore } from "../store/floorPlanStore";
 import { useFloorActions } from "./useFloorActions";
+import { useHistoryActions } from "./useHistoryActions";
 
 export const useSaveLoadActions = () => {
   const {
@@ -8,10 +9,10 @@ export const useSaveLoadActions = () => {
     setFloors,
     setGroups,
     setSelectedElements,
-    setHistory,
     setHistoryIndex,
   } = useFloorPlanStore();
   const { addToHistory } = useFloorActions();
+  const { setHistory } = useHistoryActions();
 
   const saveFloorPlan = (name: string) => {
     const planData = {

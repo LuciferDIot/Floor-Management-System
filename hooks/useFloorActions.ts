@@ -1,5 +1,6 @@
 import { ElementType, type FloorType } from "../lib/types";
 import { useFloorPlanStore } from "../store/floorPlanStore";
+import { useHistoryActions } from "./useHistoryActions";
 
 export const useFloorActions = () => {
   const {
@@ -12,22 +13,9 @@ export const useFloorActions = () => {
     isDrawingCustomShape,
     setFloors,
     setSelectedElements,
-    setHistory,
-    setHistoryIndex,
   } = useFloorPlanStore();
 
-  const addToHistory = () => {
-    const currentState = {
-      floors,
-      selectedElements,
-      groups: useFloorPlanStore.getState().groups,
-    };
-    const history = useFloorPlanStore.getState().history;
-    const historyIndex = useFloorPlanStore.getState().historyIndex;
-    const newHistory = history.slice(0, historyIndex + 1);
-    setHistory([...newHistory, currentState]);
-    setHistoryIndex(historyIndex + 1);
-  };
+  const { addToHistory } = useHistoryActions();
 
   const addFloor = () => {
     const newFloor: FloorType = {

@@ -3,11 +3,14 @@ import { useFloorPlanStore } from "../store/floorPlanStore";
 
 export const useHistoryActions = () => {
   const {
+    floors,
+    selectedElements,
     history,
     historyIndex,
     setFloors,
     setSelectedElements,
     setGroups,
+    setHistory,
     setHistoryIndex,
   } = useFloorPlanStore();
 
@@ -35,9 +38,24 @@ export const useHistoryActions = () => {
     setHistoryIndex(historyIndex + 1);
   };
 
+  const addToHistory = () => {
+    const currentState = {
+      floors,
+      selectedElements,
+      groups: useFloorPlanStore.getState().groups,
+    };
+    const history = useFloorPlanStore.getState().history;
+    const historyIndex = useFloorPlanStore.getState().historyIndex;
+    const newHistory = history.slice(0, historyIndex + 1);
+    setHistory([...newHistory, currentState]);
+    setHistoryIndex(historyIndex + 1);
+  };
+
   return {
     history,
     historyIndex,
+    addToHistory,
+    setHistory,
     undo,
     redo,
     canUndo,
