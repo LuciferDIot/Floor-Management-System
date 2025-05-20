@@ -1,66 +1,70 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Canvas } from "./canvas/canvas"
-import { Toolbar } from "./toolbar/toolbar"
-import { PropertiesPanel } from "./properties/properties-panel"
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store"
-import { ContextMenuProvider } from "./context-menu/context-menu-provider"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { CustomShapeWizard } from "./shapes/custom-shape-wizard"
-import { Toaster } from "@/components/ui/toaster"
-import { useToast } from "@/hooks/use-toast"
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useHistoryActions } from "@/hooks/useHistoryActions";
+import { useSaveLoadActions } from "@/hooks/useSaveLoadActions";
+import { useEffect, useState } from "react";
+import { Canvas } from "./canvas/canvas";
+import { ContextMenuProvider } from "./context-menu/context-menu-provider";
+import { PropertiesPanel } from "./properties/properties-panel";
+import { CustomShapeWizard } from "./shapes/custom-shape-wizard";
+import { Toolbar } from "./toolbar/toolbar";
 
 export default function FloorPlanEditor() {
-  const { toast } = useToast()
-  const [showCustomShapeWizard, setShowCustomShapeWizard] = useState(false)
-  const { selectedElements, addToHistory, canUndo, canRedo, undo, redo, saveFloorPlan, loadFloorPlan } =
-    useFloorPlanStore()
+  const { toast } = useToast();
+  const [showCustomShapeWizard, setShowCustomShapeWizard] = useState(false);
+
+  const { selectedElements } = useFloorActions();
+  const { saveFloorPlan, loadFloorPlan } = useSaveLoadActions();
+  const { canRedo, canUndo, undo, redo } = useHistoryActions();
 
   // Auto-save every 5 minutes
   useEffect(() => {
-    const interval = setInterval(
-      () => {
-        saveFloorPlan("auto-save")
-        toast({
-          title: "Auto-saved",
-          description: "Your floor plan has been automatically saved",
-          duration: 3000,
-        })
-      },
-      5 * 60 * 1000,
-    )
+    const interval = setInterval(() => {
+      saveFloorPlan("auto-save");
+      toast({
+        title: "Auto-saved",
+        description: "Your floor plan has been automatically saved",
+        duration: 3000,
+      });
+    }, 5 * 60 * 1000);
 
-    return () => clearInterval(interval)
-  }, [saveFloorPlan, toast])
+    return () => clearInterval(interval);
+  }, [saveFloorPlan, toast]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Undo: Ctrl+Z
       if (e.ctrlKey && e.key === "z" && canUndo) {
-        e.preventDefault()
-        undo()
+        e.preventDefault();
+        undo();
       }
 
       // Redo: Ctrl+Y or Ctrl+Shift+Z
-      if ((e.ctrlKey && e.key === "y") || (e.ctrlKey && e.shiftKey && e.key === "z")) {
+      if (
+        (e.ctrlKey && e.key === "y") ||
+        (e.ctrlKey && e.shiftKey && e.key === "z")
+      ) {
         if (canRedo) {
-          e.preventDefault()
-          redo()
+          e.preventDefault();
+          redo();
         }
       }
 
       // Toggle grid: Ctrl+G
       if (e.ctrlKey && e.key === "g") {
-        e.preventDefault()
+        e.preventDefault();
         // Toggle grid visibility
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [canUndo, canRedo, undo, redo])
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [canUndo, canRedo, undo, redo]);
 
   return (
     <TooltipProvider>
@@ -82,13 +86,14 @@ export default function FloorPlanEditor() {
           {showCustomShapeWizard && (
             <CustomShapeWizard
               onClose={() => setShowCustomShapeWizard(false)}
-              onSave={(shape) => {
+              onSave={() => {
                 // Add shape to templates
-                setShowCustomShapeWizard(false)
+                setShowCustomShapeWizard(false);
                 toast({
                   title: "Shape created",
-                  description: "Your custom shape has been added to the shape picker",
-                })
+                  description:
+                    "Your custom shape has been added to the shape picker",
+                });
               }}
             />
           )}
@@ -96,5 +101,5 @@ export default function FloorPlanEditor() {
         <Toaster />
       </ContextMenuProvider>
     </TooltipProvider>
-  )
+  );
 }

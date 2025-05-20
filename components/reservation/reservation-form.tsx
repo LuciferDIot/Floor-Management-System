@@ -17,7 +17,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useReservationActions } from "@/hooks/useReservationActions";
+import { useShapeActions } from "@/hooks/useShapeActions";
 import {
   ElementType,
   ReservationStatus,
@@ -43,14 +45,9 @@ export function ReservationForm({ onClose }: ReservationFormProps) {
     ReservationStatus.RESERVED
   );
 
-  const {
-    selectedElements,
-    floors,
-    updateShape,
-    updateReservation,
-    getChairsForTable,
-    addToHistory,
-  } = useFloorPlanStore();
+  const { addToHistory } = useFloorActions();
+  const { floors, getChairsForTable } = useReservationActions();
+  const { selectedElements, updateShape } = useShapeActions();
 
   // Get chair count for the selected table
   const [chairCount, setChairCount] = useState(0);

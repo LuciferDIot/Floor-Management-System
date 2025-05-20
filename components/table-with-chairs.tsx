@@ -1,6 +1,6 @@
 "use client";
 
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useReservationActions } from "@/hooks/useReservationActions";
 import { ShapeCategory, type ShapeType } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { Shape } from "./shapes/shape";
@@ -11,7 +11,8 @@ interface TableWithChairsProps {
 }
 
 export function TableWithChairs({ tableId, floorId }: TableWithChairsProps) {
-  const { floors, getChairsForTable, updateReservation } = useFloorPlanStore();
+  const { floors, getChairsForTable, updateReservation } =
+    useReservationActions();
   const [table, setTable] = useState<ShapeType | null>(null);
   const [chairs, setChairs] = useState<ShapeType[]>([]);
 

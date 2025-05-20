@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useCustomShapeActions } from "@/hooks/useCustomShapeActions";
 import { ShapeCategory } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 
 interface CustomShapeWizardProps {
   onClose: () => void;
+  onSave: () => void;
 }
 
 export function CustomShapeWizard({ onClose }: CustomShapeWizardProps) {
@@ -24,7 +25,7 @@ export function CustomShapeWizard({ onClose }: CustomShapeWizardProps) {
   const [points, setPoints] = useState<{ x: number; y: number }[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const { saveCustomShape } = useFloorPlanStore();
+  const { saveCustomShape } = useCustomShapeActions();
 
   // Clear canvas when drawing mode changes
   useEffect(() => {

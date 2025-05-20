@@ -1,16 +1,18 @@
 "use client";
 
-import type React from "react";
-
-import { useFloorPlanStore } from "@/lib/store/floor-plan-store";
+import { useFloorActions } from "@/hooks/useFloorActions";
+import { useReservationActions } from "@/hooks/useReservationActions";
+import { useSelectionActions } from "@/hooks/useSelectionActions";
+import { useShapeActions } from "@/hooks/useShapeActions";
 import {
-  type ShapeType,
   ElementType,
   ReservationStatus,
   ShapeCategory,
+  ShapeType,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ContextMenu } from "../context-menu/context-menu";
 import { ReservationBadge } from "../reservation/reservation-badge";
 import { RotateHandle } from "./rotate-handle";
@@ -28,22 +30,12 @@ export function Shape({ shape, floorId, isInGroup = false }: ShapeProps) {
     x: 0,
     y: 0,
   });
-  const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
-  const {
-    selectedElements,
-    selectShape,
-    updateShape,
-    deleteShape,
-    moveShape,
-    reserveTable,
-    unreserveTable,
-    snapToGrid,
-    gridSize,
-    addToHistory,
-    getChairsForTable,
-  } = useFloorPlanStore();
+  const { selectedElements, updateShape, deleteShape } = useShapeActions();
+  const { reserveTable, unreserveTable, getChairsForTable } =
+    useReservationActions();
+  const { snapToGrid, gridSize, addToHistory } = useFloorActions();
+  const { selectShape } = useSelectionActions();
 
   const isSelected = selectedElements.some(
     (el) => el.id === shape.id && el.type === ElementType.SHAPE
@@ -53,43 +45,28 @@ export function Shape({ shape, floorId, isInGroup = false }: ShapeProps) {
 
   const handleShapeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    // Only handle click if not dragging
-    if (!isDragging) {
-      const isCtrlPressed = e.ctrlKey;
-      selectShape(shape.id);
-    }
+    selectShape(shape.id);
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (shapeRef.current) {
-      const rect = shapeRef.current.getBoundingClientRect();
-      setContextMenuPosition({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-      setShowContextMenu(true);
-
-      // Select the shape when right-clicking
-      selectShape(shape.id);
-    }
+    // Get the position relative to the viewport instead of the shape
+    setContextMenuPosition({
+      x: e.clientX,
+      y: e.clientY,
+    });
+    setShowContextMenu(true);
+    selectShape(shape.id);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return; // Only left mouse button
-    e.stopPropagation();
-
-    // Alt + Drag to duplicate
-    if (e.altKey) {
-      // Duplicate shape logic
-      return;
-    }
-
-    setIsDragging(true);
-    setStartPos({ x: e.clientX, y: e.clientY });
+  const handleDragStart = (e: React.DragEvent) => {
+    // Set drag image to empty image for smoother dragging
+    const img = new Image();
+    img.src =
+      "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    e.dataTransfer.setDragImage(img, 0, 0);
 
     // Select the shape if not already selected
     if (!isSelected) {
@@ -97,63 +74,51 @@ export function Shape({ shape, floorId, isInGroup = false }: ShapeProps) {
     }
   };
 
-  // Fix the event listener setup - replace useState with useEffect
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
+  const handleDrag = (e: React.DragEvent) => {
+    if (e.clientX === 0 && e.clientY === 0) return; // Ignore invalid events
 
-      const dx = e.clientX - startPos.x;
-      const dy = e.clientY - startPos.y;
+    const container = shapeRef.current?.parentElement?.getBoundingClientRect();
+    if (!container) return;
 
-      let newX = shape.x + dx;
-      let newY = shape.y + dy;
+    // Calculate new position relative to container
+    let newX = e.clientX - container.left - shape.width / 2;
+    let newY = e.clientY - container.top - shape.height / 2;
 
-      // Snap to grid if enabled
-      if (snapToGrid) {
-        newX = Math.round(newX / gridSize) * gridSize;
-        newY = Math.round(newY / gridSize) * gridSize;
-      }
-
-      // Use moveShape which handles group membership
-      moveShape(floorId, shape.id, newX, newY);
-
-      setStartPos({ x: e.clientX, y: e.clientY });
-    };
-
-    const handleGlobalMouseUp = () => {
-      if (isDragging) {
-        setIsDragging(false);
-        addToHistory();
-      }
-    };
-
-    if (isDragging) {
-      document.addEventListener("mousemove", handleGlobalMouseMove);
-      document.addEventListener("mouseup", handleGlobalMouseUp);
+    // Apply snap to grid if enabled
+    if (snapToGrid) {
+      newX = Math.round(newX / gridSize) * gridSize;
+      newY = Math.round(newY / gridSize) * gridSize;
     }
 
-    return () => {
-      document.removeEventListener("mousemove", handleGlobalMouseMove);
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-  }, [
-    isDragging,
-    startPos,
-    shape.x,
-    shape.y,
-    snapToGrid,
-    gridSize,
-    moveShape,
-    floorId,
-    shape.id,
-    addToHistory,
-  ]);
+    // Update position visually (but don't save to state yet)
+    if (shapeRef.current) {
+      shapeRef.current.style.left = `${newX}px`;
+      shapeRef.current.style.top = `${newY}px`;
+    }
+  };
 
-  const handleRotate = (angle: number) => {
+  const handleDragEnd = (e: React.DragEvent) => {
+    const container = shapeRef.current?.parentElement?.getBoundingClientRect();
+    if (!container) return;
+
+    // Calculate final position
+    let newX = e.clientX - container.left - shape.width / 2;
+    let newY = e.clientY - container.top - shape.height / 2;
+
+    // Apply snap to grid if enabled
+    if (snapToGrid) {
+      newX = Math.round(newX / gridSize) * gridSize;
+      newY = Math.round(newY / gridSize) * gridSize;
+    }
+
+    // Save final position to state
     updateShape(floorId, shape.id, {
       ...shape,
-      rotation: angle,
+      x: newX,
+      y: newY,
     });
+
+    addToHistory();
   };
 
   // Render different shapes based on category and type
@@ -217,79 +182,89 @@ export function Shape({ shape, floorId, isInGroup = false }: ShapeProps) {
     }
   };
 
-  // Don't add event handlers if shape is in a group
-  const eventHandlers = isInGroup
-    ? {}
-    : {
-        onClick: handleShapeClick,
-        onMouseDown: handleMouseDown,
-        onContextMenu: handleContextMenu,
-      };
+  const handleRotate = (angle: number) => {
+    updateShape(floorId, shape.id, {
+      ...shape,
+      rotation: angle,
+    });
+  };
 
   return (
-    <div
-      ref={shapeRef}
-      className={cn(
-        "absolute",
-        isSelected && "outline outline-2 outline-blue-500"
-      )}
-      style={{
-        left: shape.x,
-        top: shape.y,
-        width: shape.width,
-        height: shape.height,
-        transform: `rotate(${shape.rotation}deg)`,
-        cursor: isDragging ? "grabbing" : "grab",
-        zIndex: isSelected ? 10 : 1,
-      }}
-      {...eventHandlers}
-    >
-      {renderShape()}
+    <>
+      <div
+        ref={shapeRef}
+        draggable={!isInGroup}
+        className={cn(
+          "absolute",
+          isSelected && "outline outline-2 outline-blue-500"
+        )}
+        style={{
+          left: shape.x,
+          top: shape.y,
+          width: shape.width,
+          height: shape.height,
+          transform: `rotate(${shape.rotation}deg)`,
+          cursor: !isInGroup ? "grab" : "default",
+          zIndex: isSelected ? 10 : 1,
+        }}
+        onClick={handleShapeClick}
+        onContextMenu={handleContextMenu}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+      >
+        {renderShape()}
 
-      {/* Reservation badge for tables */}
-      {isTable && shape.reservation && (
-        <ReservationBadge
-          reservation={shape.reservation}
-          chairCount={chairCount}
-        />
-      )}
+        {/* Reservation badge for tables */}
+        {isTable && shape.reservation && (
+          <ReservationBadge
+            reservation={shape.reservation}
+            chairCount={chairCount}
+          />
+        )}
 
-      {/* Rotation handle (only show when selected and not in a group) */}
-      {isSelected && !isInGroup && (
-        <RotateHandle
-          onRotate={handleRotate}
-          initialRotation={shape.rotation}
-        />
-      )}
+        {/* Rotation handle (only show when selected and not in a group) */}
+        {isSelected && !isInGroup && (
+          <RotateHandle
+            onRotate={handleRotate}
+            initialRotation={shape.rotation}
+          />
+        )}
+      </div>
 
-      {/* Shape Context Menu */}
-      {showContextMenu && (
-        <ContextMenu
-          position={contextMenuPosition}
-          items={[
-            ...(isTable
-              ? [
-                  {
-                    label:
-                      shape.reservation?.status === ReservationStatus.RESERVED
-                        ? "Unreserve"
-                        : "Reserve",
-                    onClick: () =>
-                      shape.reservation?.status === ReservationStatus.RESERVED
-                        ? unreserveTable(floorId, shape.id)
-                        : reserveTable(floorId, shape.id, chairCount),
-                  },
-                ]
-              : []),
-            { label: "Rename", onClick: () => {} },
-            { label: "Copy", onClick: () => {} },
-            { label: "Rotate", onClick: () => {} },
-            { label: "Add to Group", onClick: () => {} },
-            { label: "Delete", onClick: () => deleteShape(floorId, shape.id) },
-          ]}
-          onClose={() => setShowContextMenu(false)}
-        />
-      )}
-    </div>
+      {/* Shape Context Menu - rendered as a portal to body */}
+      {showContextMenu &&
+        createPortal(
+          <ContextMenu
+            position={contextMenuPosition}
+            items={[
+              ...(isTable
+                ? [
+                    {
+                      label:
+                        shape.reservation?.status === ReservationStatus.RESERVED
+                          ? "Unreserve"
+                          : "Reserve",
+                      onClick: () =>
+                        shape.reservation?.status === ReservationStatus.RESERVED
+                          ? unreserveTable(floorId, shape.id)
+                          : reserveTable(floorId, shape.id, chairCount),
+                    },
+                  ]
+                : []),
+              { label: "Rename", onClick: () => {} },
+              { label: "Copy", onClick: () => {} },
+              { label: "Rotate", onClick: () => {} },
+              { label: "Add to Group", onClick: () => {} },
+              {
+                label: "Delete",
+                onClick: () => deleteShape(floorId, shape.id),
+              },
+            ]}
+            onClose={() => setShowContextMenu(false)}
+          />,
+          document.body
+        )}
+    </>
   );
 }
