@@ -6,11 +6,14 @@ import {
   type HistoryAction,
   type SelectedElement,
   ShapeCategory,
+  UseType,
 } from "@/lib/types";
 import { create } from "zustand";
 
 interface FloorPlanState {
+  mode: UseType | null;
   floors: FloorType[];
+  floorIndex: number;
   groups: Record<string, GroupType>;
   selectedElements: SelectedElement[];
   zoom: number;
@@ -23,6 +26,8 @@ interface FloorPlanState {
   isDrawingCustomShape: boolean;
 
   // State setters
+  setMode: (mode: UseType) => void;
+  setFloorIndex: (index: number) => void;
   setFloors: (floors: FloorType[]) => void;
   setGroups: (groups: Record<string, GroupType>) => void;
   setSelectedElements: (elements: SelectedElement[]) => void;
@@ -37,6 +42,8 @@ interface FloorPlanState {
 }
 
 export const useFloorPlanStore = create<FloorPlanState>((set) => ({
+  mode: null,
+  floorIndex: 0,
   floors: [
     {
       id: "floor-1",
@@ -49,6 +56,7 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
       shapes: [
         {
           id: "table-1",
+          floorId: "floor-1",
           label: "Table 1",
           category: ShapeCategory.TABLE,
           x: 100,
@@ -59,6 +67,7 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
         },
         {
           id: "chair-1",
+          floorId: "floor-1",
           label: "Chair 1",
           category: ShapeCategory.CHAIR,
           x: 200,
@@ -82,6 +91,8 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
   currentTool: "select",
   isDrawingCustomShape: false,
 
+  setMode: (mode) => set({ mode }),
+  setFloorIndex: (index) => set({ floorIndex: index }),
   setFloors: (floors) => set({ floors }),
   setGroups: (groups) => set({ groups }),
   setSelectedElements: (elements) => set({ selectedElements: elements }),

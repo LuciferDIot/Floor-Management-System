@@ -15,6 +15,7 @@ export function Canvas() {
 
   const {
     floors,
+    floorIndex,
     zoom,
     panOffset,
     snapToGrid,
@@ -103,9 +104,7 @@ export function Canvas() {
         )}
 
         {/* Floors */}
-        {floors.map((floor) => (
-          <Floor key={floor.id} floor={floor} />
-        ))}
+        <Floor key={floors[floorIndex].id} floor={floors[floorIndex]} />
       </div>
 
       {/* Canvas Context Menu */}

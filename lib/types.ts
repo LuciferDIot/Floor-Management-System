@@ -1,3 +1,8 @@
+export enum UseType {
+  BASIC = "basic",
+  ADVANCED = "advanced",
+}
+
 export interface FloorType {
   id: string;
   name: string;
@@ -17,6 +22,7 @@ export enum ShapeCategory {
 
 export interface ShapeType {
   id: string;
+  floorId: string | null;
   label: string;
   category: ShapeCategory;
   x: number;
@@ -28,7 +34,7 @@ export interface ShapeType {
   stroke?: string;
   customPath?: string;
   groupId?: string;
-  tableId?: string; // For chairs to be linked to tables
+  tableId?: string;
   reservation?: ReservationType;
 }
 
@@ -36,8 +42,11 @@ export interface GroupType {
   id: string;
   name: string;
   shapeIds: string[];
+  floorId: string;
   rotation: number;
   center: { x: number; y: number };
+  width?: number;
+  height?: number;
 }
 
 export enum ReservationStatus {
@@ -64,6 +73,7 @@ export enum ElementType {
 export interface SelectedElement {
   id: string;
   type: ElementType;
+  floorId: string | null;
 }
 
 export type HistoryAction = {

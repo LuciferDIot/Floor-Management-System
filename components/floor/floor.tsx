@@ -52,12 +52,14 @@ export function Floor({ floor }: FloorProps) {
 
     // Select floor
     if (!e.ctrlKey) {
-      setSelectedElements([{ id: floor.id, type: ElementType.FLOOR }]);
+      setSelectedElements([
+        { id: floor.id, type: ElementType.FLOOR, floorId: floor.id },
+      ]);
     } else {
       // Add to multi-selection with Ctrl key
       setSelectedElements([
         ...selectedElements,
-        { id: floor.id, type: ElementType.FLOOR },
+        { id: floor.id, type: ElementType.FLOOR, floorId: floor.id },
       ]);
     }
   };
@@ -80,7 +82,9 @@ export function Floor({ floor }: FloorProps) {
           (el) => el.id === floor.id && el.type === ElementType.FLOOR
         )
       ) {
-        setSelectedElements([{ id: floor.id, type: ElementType.FLOOR }]);
+        setSelectedElements([
+          { id: floor.id, type: ElementType.FLOOR, floorId: floor.id },
+        ]);
       }
     }
   };

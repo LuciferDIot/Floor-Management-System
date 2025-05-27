@@ -31,7 +31,11 @@ export const useSelectionActions = () => {
         ) {
           setSelectedElements([
             ...selectedElements,
-            { id: groupId, type: ElementType.GROUP },
+            {
+              id: groupId,
+              type: ElementType.GROUP,
+              floorId: floorId ? floorId : null,
+            },
           ]);
         }
       } else if (floorId) {
@@ -42,15 +46,19 @@ export const useSelectionActions = () => {
         ) {
           setSelectedElements([
             ...selectedElements,
-            { id: shapeId, type: ElementType.SHAPE },
+            { id: shapeId, type: ElementType.SHAPE, floorId },
           ]);
         }
       }
     } else {
       if (groupId) {
-        setSelectedElements([{ id: groupId, type: ElementType.GROUP }]);
+        setSelectedElements([
+          { id: groupId, type: ElementType.GROUP, floorId },
+        ]);
       } else if (floorId) {
-        setSelectedElements([{ id: shapeId, type: ElementType.SHAPE }]);
+        setSelectedElements([
+          { id: shapeId, type: ElementType.SHAPE, floorId },
+        ]);
       }
     }
   };

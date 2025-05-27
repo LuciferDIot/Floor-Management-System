@@ -27,7 +27,7 @@ export function ShapeFactory({ shape, floorId }: ShapeFactoryProps) {
 
     // This is the first shape, render the entire group
     return (
-      <GroupWrapper groupId={shape.groupId} floorId={floorId}>
+      <GroupWrapper groupId={shape.groupId}>
         {group.shapeIds.map((shapeId) => {
           // Find the shape in the floor
           const groupShape = floors

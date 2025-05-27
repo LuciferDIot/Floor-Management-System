@@ -6,6 +6,7 @@ export const useFloorActions = () => {
   const {
     zoom,
     floors,
+    floorIndex,
     selectedElements,
     panOffset,
     snapToGrid,
@@ -83,6 +84,7 @@ export const useFloorActions = () => {
   return {
     zoom,
     floors,
+    floorIndex,
     selectedElements,
     panOffset,
     snapToGrid,

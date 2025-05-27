@@ -3,18 +3,19 @@ import { useFloorPlanStore } from "../store/floorPlanStore";
 import { useFloorActions } from "./useFloorActions";
 
 export const useShapeActions = () => {
-  const { floors, selectedElements, groups, setFloors, setSelectedElements } =
-    useFloorPlanStore();
+  const {
+    floors,
+    floorIndex,
+    selectedElements,
+    groups,
+    setFloors,
+    setSelectedElements,
+  } = useFloorPlanStore();
   const { addToHistory } = useFloorActions();
 
   const addShape = (shape: ShapeType) => {
-    let floorId = floors[0].id;
-    if (
-      selectedElements.length === 1 &&
-      selectedElements[0].type === ElementType.FLOOR
-    ) {
-      floorId = selectedElements[0].id;
-    }
+    let floorId = floors[floorIndex].id;
+
     setFloors(
       floors.map((floor) =>
         floor.id === floorId

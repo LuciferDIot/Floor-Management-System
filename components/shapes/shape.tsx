@@ -21,9 +21,15 @@ interface ShapeProps {
   shape: ShapeType;
   floorId: string;
   isInGroup?: boolean;
+  style?: React.CSSProperties;
 }
 
-export function Shape({ shape, floorId, isInGroup = false }: ShapeProps) {
+export function Shape({
+  shape,
+  floorId,
+  isInGroup = false,
+  style,
+}: ShapeProps) {
   const shapeRef = useRef<HTMLDivElement>(null);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({
@@ -199,13 +205,15 @@ export function Shape({ shape, floorId, isInGroup = false }: ShapeProps) {
           isSelected && "outline outline-2 outline-blue-500"
         )}
         style={{
-          left: shape.x,
-          top: shape.y,
+          ...style,
+          left: !isInGroup ? shape.x : style?.left,
+          top: !isInGroup ? shape.y : style?.top,
           width: shape.width,
           height: shape.height,
           transform: `rotate(${shape.rotation}deg)`,
           cursor: !isInGroup ? "grab" : "default",
           zIndex: isSelected ? 10 : 1,
+          position: "absolute",
         }}
         onClick={handleShapeClick}
         onContextMenu={handleContextMenu}

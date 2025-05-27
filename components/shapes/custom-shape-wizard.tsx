@@ -276,8 +276,8 @@ export function CustomShapeWizard({ onClose }: CustomShapeWizardProps) {
               defaultValue={ShapeCategory.TABLE}
               className="grid gap-2"
             >
-              {Object.keys(ShapeCategory).map((key) => (
-                <div className="flex items-center space-x-2">
+              {Object.keys(ShapeCategory).map((key, index) => (
+                <div className="flex items-center space-x-2" key={index}>
                   <RadioGroupItem
                     id={key}
                     value={ShapeCategory[key as keyof typeof ShapeCategory]}

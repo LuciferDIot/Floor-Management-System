@@ -21,6 +21,7 @@ export const useCustomShapeActions = () => {
     const shape: ShapeType = {
       id: `custom-${Date.now()}`,
       label: label || `Custom ${category}`,
+      floorId: null,
       category: category as any,
       x: Math.min(...points.map((p) => p.x)),
       y: Math.min(...points.map((p) => p.y)),

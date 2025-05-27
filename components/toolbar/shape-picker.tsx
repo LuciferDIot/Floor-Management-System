@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useFloorActions } from "@/hooks/useFloorActions";
 import { useShapeActions } from "@/hooks/useShapeActions";
 import { ShapeCategory } from "@/lib/types";
 import { ChevronDown, Circle, Square } from "lucide-react";
@@ -15,9 +16,17 @@ import { useState } from "react";
 
 export function ShapePicker() {
   const { addShape } = useShapeActions();
+  const { floorIndex, floors } = useFloorActions();
   const [open, setOpen] = useState(false);
 
-  const tableTemplates = [
+  type ShapeTemplate = {
+    id: string;
+    label: string;
+    width: number;
+    height: number;
+  };
+
+  const tableTemplates: ShapeTemplate[] = [
     {
       id: "round-table-small",
       label: "Round Table (Small)",
@@ -55,13 +64,14 @@ export function ShapePicker() {
     { id: "chair-medium", label: "Chair (Medium)", width: 40, height: 40 },
   ];
 
-  const handleAddShape = (template: any, category: ShapeCategory) => {
+  const handleAddShape = (template: ShapeTemplate, category: ShapeCategory) => {
     addShape({
       id: `${category}-${Date.now()}`,
       label: template.label,
       category,
       x: 100,
       y: 100,
+      floorId: floors[floorIndex].id,
       width: template.width,
       height: template.height,
       rotation: 0,
