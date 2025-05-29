@@ -11,7 +11,7 @@ import {
 import { create } from "zustand";
 
 interface FloorPlanState {
-  mode: UseType | null;
+  mode: UseType;
   floors: FloorType[];
   floorIndex: number;
   groups: Record<string, GroupType>;
@@ -42,7 +42,7 @@ interface FloorPlanState {
 }
 
 export const useFloorPlanStore = create<FloorPlanState>((set) => ({
-  mode: null,
+  mode: UseType.BASIC,
   floorIndex: 0,
   floors: [
     {
@@ -64,18 +64,6 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
           width: 80,
           height: 80,
           rotation: 0,
-        },
-        {
-          id: "chair-1",
-          floorId: "floor-1",
-          label: "Chair 1",
-          category: ShapeCategory.CHAIR,
-          x: 200,
-          y: 100,
-          width: 40,
-          height: 40,
-          rotation: 0,
-          tableId: "table-1",
         },
       ],
     },

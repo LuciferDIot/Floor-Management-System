@@ -1,6 +1,7 @@
 "use client";
 
 import { useFloorActions } from "@/hooks/useFloorActions";
+import { useMode } from "@/hooks/useMode";
 import { useReservationActions } from "@/hooks/useReservationActions";
 import { useSelectionActions } from "@/hooks/useSelectionActions";
 import { useShapeActions } from "@/hooks/useShapeActions";
@@ -9,6 +10,7 @@ import {
   ReservationStatus,
   ShapeCategory,
   ShapeType,
+  UseType,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
@@ -31,6 +33,8 @@ export function Shape({
   style,
 }: ShapeProps) {
   const shapeRef = useRef<HTMLDivElement>(null);
+  const { mode } = useMode();
+
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({
     x: 0,
@@ -195,6 +199,33 @@ export function Shape({
     });
   };
 
+  const ContextMenuItems = [
+    ...(isTable
+      ? [
+          {
+            label:
+              shape.reservation?.status === ReservationStatus.RESERVED
+                ? "Unreserve"
+                : "Reserve",
+            onClick: () =>
+              shape.reservation?.status === ReservationStatus.RESERVED
+                ? unreserveTable(floorId, shape.id)
+                : reserveTable(floorId, shape.id, chairCount),
+          },
+        ]
+      : []),
+    { label: "Rename", onClick: () => {} },
+    { label: "Copy", onClick: () => {} },
+    { label: "Rotate", onClick: () => {} },
+    ...(mode === UseType.ADVANCED
+      ? [{ label: "Add to Group", onClick: () => {} }]
+      : []),
+    {
+      label: "Delete",
+      onClick: () => deleteShape(floorId, shape.id),
+    },
+  ];
+
   return (
     <>
       <div
@@ -245,30 +276,7 @@ export function Shape({
         createPortal(
           <ContextMenu
             position={contextMenuPosition}
-            items={[
-              ...(isTable
-                ? [
-                    {
-                      label:
-                        shape.reservation?.status === ReservationStatus.RESERVED
-                          ? "Unreserve"
-                          : "Reserve",
-                      onClick: () =>
-                        shape.reservation?.status === ReservationStatus.RESERVED
-                          ? unreserveTable(floorId, shape.id)
-                          : reserveTable(floorId, shape.id, chairCount),
-                    },
-                  ]
-                : []),
-              { label: "Rename", onClick: () => {} },
-              { label: "Copy", onClick: () => {} },
-              { label: "Rotate", onClick: () => {} },
-              { label: "Add to Group", onClick: () => {} },
-              {
-                label: "Delete",
-                onClick: () => deleteShape(floorId, shape.id),
-              },
-            ]}
+            items={ContextMenuItems}
             onClose={() => setShowContextMenu(false)}
           />,
           document.body

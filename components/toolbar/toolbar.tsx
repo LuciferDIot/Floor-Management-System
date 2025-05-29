@@ -5,8 +5,9 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { useFloorActions } from "@/hooks/useFloorActions";
 import { useGroupActions } from "@/hooks/useGroupActions";
+import { useMode } from "@/hooks/useMode";
 import { useToolActions } from "@/hooks/useToolActions";
-import { ShapeCategory } from "@/lib/types";
+import { ShapeCategory, UseType } from "@/lib/types";
 import {
   Circle,
   Grid,
@@ -20,6 +21,7 @@ import {
   Ungroup,
 } from "lucide-react";
 import { LoadPlanDropdown } from "./load-plan-dropdown";
+import SettingsMenu from "./settings-menu";
 import { ShapePicker } from "./shape-picker";
 
 interface ToolbarProps {
@@ -41,6 +43,7 @@ export function Toolbar({
   onUndo,
   onRedo,
 }: ToolbarProps) {
+  const { mode } = useMode();
   const { snapToGrid, selectedElements } = useFloorActions();
 
   const { updateSnapToGrid } = useCanvasActions();
@@ -102,61 +105,71 @@ export function Toolbar({
 
       <div className="h-6 w-px bg-gray-200 mx-1" />
 
-      <ToggleGroup
-        type="single"
-        value={currentTool}
-        onValueChange={(value) => value && updateCurrentTool(value)}
-      >
-        <ToggleGroupItem value="select" title="Select Tool">
-          <RotateCcw className="h-4 w-4" />
-        </ToggleGroupItem>
-        <ToggleGroupItem value={ShapeCategory.TABLE} title="Add Table">
-          <Circle className="h-4 w-4" />
-        </ToggleGroupItem>
-        <ToggleGroupItem value={ShapeCategory.CHAIR} title="Add Chair">
-          <Square className="h-4 w-4" />
-        </ToggleGroupItem>
-      </ToggleGroup>
+      {mode === UseType.ADVANCED && (
+        <>
+          <ToggleGroup
+            type="single"
+            value={currentTool}
+            onValueChange={(value) => value && updateCurrentTool(value)}
+          >
+            <ToggleGroupItem value="select" title="Select Tool">
+              <RotateCcw className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value={ShapeCategory.TABLE} title="Add Table">
+              <Circle className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value={ShapeCategory.CHAIR} title="Add Chair">
+              <Square className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onCustomShapeClick}
-        className="gap-1"
-        title="Draw Custom Shape"
-      >
-        <Pencil className="h-4 w-4" />
-        <span className="hidden sm:inline">Custom Shape</span>
-      </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCustomShapeClick}
+            className="gap-1"
+            title="Draw Custom Shape"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="hidden sm:inline">Custom Shape</span>
+          </Button>
+        </>
+      )}
 
       <div className="h-6 w-px bg-gray-200 mx-1" />
 
       <ShapePicker />
 
       <div className="ml-auto flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => createGroup()}
-          disabled={!hasMultiSelection}
-          className="gap-1"
-          title="Group Selected Elements"
-        >
-          <Group className="h-4 w-4" />
-          <span className="hidden sm:inline">Group</span>
-        </Button>
+        {mode === UseType.ADVANCED && (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => createGroup()}
+              disabled={!hasMultiSelection}
+              className="gap-1"
+              title="Group Selected Elements"
+            >
+              <Group className="h-4 w-4" />
+              <span className="hidden sm:inline">Group</span>
+            </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => ungroupElements()}
-          disabled={!hasSelection}
-          className="gap-1"
-          title="Ungroup Selected Elements"
-        >
-          <Ungroup className="h-4 w-4" />
-          <span className="hidden sm:inline">Ungroup</span>
-        </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => ungroupElements()}
+              disabled={!hasSelection}
+              className="gap-1"
+              title="Ungroup Selected Elements"
+            >
+              <Ungroup className="h-4 w-4" />
+              <span className="hidden sm:inline">Ungroup</span>
+            </Button>
+          </>
+        )}
+
+        <SettingsMenu />
       </div>
     </div>
   );

@@ -9,12 +9,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useFloorActions } from "@/hooks/useFloorActions";
+import { useMode } from "@/hooks/useMode";
 import { useShapeActions } from "@/hooks/useShapeActions";
-import { ShapeCategory } from "@/lib/types";
+import { ShapeCategory, UseType } from "@/lib/types";
 import { ChevronDown, Circle, Square } from "lucide-react";
 import { useState } from "react";
 
 export function ShapePicker() {
+  const { mode } = useMode();
   const { addShape } = useShapeActions();
   const { floorIndex, floors } = useFloorActions();
   const [open, setOpen] = useState(false);
@@ -102,20 +104,22 @@ export function ShapePicker() {
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>
-        <DropdownMenuGroup>
-          <DropdownMenuItem className="font-medium" disabled>
-            Chairs
-          </DropdownMenuItem>
-          {chairTemplates.map((template) => (
-            <DropdownMenuItem
-              key={template.id}
-              onClick={() => handleAddShape(template, ShapeCategory.CHAIR)}
-            >
-              <Square className="h-4 w-4 mr-2" />
-              {template.label}
+        {mode === UseType.ADVANCED && (
+          <DropdownMenuGroup>
+            <DropdownMenuItem className="font-medium" disabled>
+              Chairs
             </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
+            {chairTemplates.map((template) => (
+              <DropdownMenuItem
+                key={template.id}
+                onClick={() => handleAddShape(template, ShapeCategory.CHAIR)}
+              >
+                <Square className="h-4 w-4 mr-2" />
+                {template.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
