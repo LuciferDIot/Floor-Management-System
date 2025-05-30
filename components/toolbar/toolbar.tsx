@@ -15,12 +15,12 @@ import {
   Pencil,
   Redo,
   RotateCcw,
-  Save,
   Square,
   Undo,
   Ungroup,
 } from "lucide-react";
 import { LoadPlanDropdown } from "./load-plan-dropdown";
+import SelectedProperties from "./selected-properties";
 import SettingsMenu from "./settings-menu";
 import { ShapePicker } from "./shape-picker";
 
@@ -56,16 +56,7 @@ export function Toolbar({
   return (
     <div className="border-b p-2 flex items-center gap-2 bg-white">
       <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onSave}
-          title="Save Floor Plan"
-        >
-          <Save className="h-4 w-4" />
-        </Button>
-
-        <LoadPlanDropdown onLoad={onLoad} />
+        <LoadPlanDropdown onSave={onSave} onLoad={onLoad} />
 
         <div className="h-6 w-px bg-gray-200 mx-1" />
 
@@ -139,6 +130,10 @@ export function Toolbar({
       <div className="h-6 w-px bg-gray-200 mx-1" />
 
       <ShapePicker />
+
+      <div className="h-6 w-px bg-gray-200 mx-1" />
+
+      <SelectedProperties />
 
       <div className="ml-auto flex items-center gap-1">
         {mode === UseType.ADVANCED && (

@@ -6,6 +6,7 @@ import {
   type HistoryAction,
   type SelectedElement,
   ShapeCategory,
+  ShapeType,
   UseType,
 } from "@/lib/types";
 import { create } from "zustand";
@@ -39,6 +40,11 @@ interface FloorPlanState {
   setHistoryIndex: (index: number) => void;
   setCurrentTool: (tool: string) => void;
   setIsDrawingCustomShape: (isDrawing: boolean) => void;
+  updateShape: (
+    floorId: string,
+    shapeId: string,
+    updates: Partial<ShapeType>
+  ) => void;
 }
 
 export const useFloorPlanStore = create<FloorPlanState>((set) => ({
@@ -93,4 +99,34 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
   setCurrentTool: (tool) => set({ currentTool: tool }),
   setIsDrawingCustomShape: (isDrawing) =>
     set({ isDrawingCustomShape: isDrawing }),
+
+  updateShape: (floorId, shapeId, updates) => {
+    set((state) => {
+      const floorIndex = state.floors.findIndex(
+        (floor) => floor.id === floorId
+      );
+      if (floorIndex === -1) return state; // Floor not found
+
+      const shapeIndex = state.floors[floorIndex].shapes.findIndex(
+        (shape) => shape.id === shapeId
+      );
+      if (shapeIndex === -1) return state; // Shape not found
+
+      // Create optimized update
+      const newFloors = [...state.floors];
+      newFloors[floorIndex] = {
+        ...newFloors[floorIndex],
+        shapes: [
+          ...newFloors[floorIndex].shapes.slice(0, shapeIndex),
+          {
+            ...newFloors[floorIndex].shapes[shapeIndex],
+            ...updates,
+          },
+          ...newFloors[floorIndex].shapes.slice(shapeIndex + 1),
+        ],
+      };
+
+      return { floors: newFloors };
+    });
+  },
 }));

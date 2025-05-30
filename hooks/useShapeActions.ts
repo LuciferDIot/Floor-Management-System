@@ -9,6 +9,7 @@ export const useShapeActions = () => {
     selectedElements,
     groups,
     setFloors,
+    updateShape,
     setSelectedElements,
   } = useFloorPlanStore();
   const { addToHistory } = useFloorActions();
@@ -26,19 +27,6 @@ export const useShapeActions = () => {
     addToHistory();
   };
 
-  const updateShape = (floorId: string, shapeId: string, shape: ShapeType) => {
-    setFloors(
-      floors.map((floor) =>
-        floor.id === floorId
-          ? {
-              ...floor,
-              shapes: floor.shapes.map((s) => (s.id === shapeId ? shape : s)),
-            }
-          : floor
-      )
-    );
-  };
-
   const deleteShape = (floorId: string, shapeId: string) => {
     setFloors(
       floors.map((floor) =>
@@ -53,6 +41,13 @@ export const useShapeActions = () => {
       )
     );
     addToHistory();
+  };
+
+  const findShapeById = (floorId: string, shapeId: string) => {
+    const floor = floors.find((f) => f.id === floorId);
+    if (!floor) return null;
+    const shape = floor.shapes.find((s) => s.id === shapeId);
+    return shape ? shape : null;
   };
 
   const moveShape = (
@@ -101,6 +96,7 @@ export const useShapeActions = () => {
     groups,
     addShape,
     updateShape,
+    findShapeById,
     deleteShape,
     moveShape,
   };
